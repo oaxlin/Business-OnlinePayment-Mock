@@ -16,13 +16,17 @@ Business::OnlinePayment::Mock - A backend for mocking fake results in the Busine
 
 use Business::OnlinePayment;
 use Business::OnlinePayment::HTTPS;
-use parent Business::OnlinePayment::HTTPS;
-$me      = 'Business::OnlinePayment::Mock';
+use parent qw(Business::OnlinePayment::HTTPS);
+our $me      = 'Business::OnlinePayment::Mock';
 
 # VERSION
 # PODNAME: Business::OnlinePayment::Mock
 # ABSTRACT: Business::OnlinePayment::Mock - A backend for mocking fake results for test cards
 
+our $mock_responses;
+
+our $default_mock = {
+};
 
 sub _info {
     return {
@@ -88,16 +92,15 @@ sub submit {
             $action =~ s/ /\_/g;
         }
     }
-    if (exists $mock_responses->{$action}) {
-        my $res = {};
-        $self->error_message( $res->{'error_message'} );
-        $self->result_code( $res->{'error_code'} );
-        $self->is_success( defined $res->{'result'} && $res->{'result'} =~ /^9|11$/ ? 1 : 0 );
-        $self->order_number( $res->{'x_document'} // $res->{'x_auth_id'} ); # sale vs auth
-        return $res;
-    } else {
-        die 'Unsupported action';
-    }
+    die 'Unsupported action' unless $action;
+
+    my $result = $mock_responses->{$action} || $default_mock;
+    my $res = {};
+    $self->error_message( $res->{'error_message'} );
+    $self->result_code( $res->{'error_code'} );
+    $self->is_success( defined $res->{'result'} && $res->{'result'} =~ /^9|11$/ ? 1 : 0 );
+    $self->order_number( $res->{'x_document'} // $res->{'x_auth_id'} ); # sale vs auth
+    return $res;
 }
 
 1;
