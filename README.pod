@@ -37,11 +37,11 @@ Business::OnlinePayment::Mock - A backend for mocking fake results in the Busine
 
 =head1 AUTHOR
 
-Jason (Jayce^) Hall <jayce@lug-nut.com>
+Jason Terry <oaxlin@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2017 by Jason (Jayce^) Hall.
+This software is copyright (c) 2018 by Jason Terry.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
