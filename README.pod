@@ -1,0 +1,49 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Business::OnlinePayment::Mock - Business::OnlinePayment::Mock - A backend for mocking fake results for test cards
+
+=head1 VERSION
+
+version 0.001
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 METHODS
+
+=head2 test_transaction
+
+Get/set the server used for processing transactions.  Because we are mocked, this method effectively does nothing.
+Default: Live
+
+  #Live
+  $self->test_transaction(0);
+
+  #Certification
+  $self->test_transaction(1);
+
+=head2 submit
+
+Submit the content to the mocked API
+
+=head1 NAME
+
+Business::OnlinePayment::Mock - A backend for mocking fake results in the Business::OnlinePayment environment
+
+=head1 AUTHOR
+
+Jason (Jayce^) Hall <jayce@lug-nut.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2017 by Jason (Jayce^) Hall.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
