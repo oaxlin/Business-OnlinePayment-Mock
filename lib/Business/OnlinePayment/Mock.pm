@@ -26,10 +26,10 @@ our $me      = 'Business::OnlinePayment::Mock';
 our $mock_responses;
 
 our $default_mock = {
-     error_message => 'Declined',
-     is_success    => 0,
-     error_code    => 100,
-     order_number  => sub { time },
+    error_message => 'Declined',
+    is_success    => 0,
+    error_code    => 100,
+    order_number  => sub { time },
 };
 
 sub _info {
@@ -58,10 +58,10 @@ sub _info {
 Sets the default mock for the Business::OnlinePayment object
 
    $mock->set_default_mock({
-     error_message => 'foobar',
-     is_success    => 123
-     error_code    => 123
-     order_number  => 123
+     error_message => 'Declined',
+     is_success    => 0,
+     error_code    => 100,
+     order_number  => 1,
    });
 
 =cut
@@ -77,10 +77,10 @@ sub set_default_mock {
 Sets the mock response the Business::OnlinePayment object
 
    $mock->set_mock_response({
-     error_message => 'foobar',
-     is_success    => 123
-     error_code    => 123
-     order_number  => 123
+     error_message => 'Approved',
+     is_success    => 1,
+     error_code    => 0,
+     order_number  => 1,
    });
 
 =cut
@@ -121,6 +121,10 @@ sub test_transaction {
 
 Submit the content to the mocked API
 
+  $self->content(action => 'Credit' ...)
+
+  $self->submit;
+
 =cut
 
 sub submit {
@@ -136,8 +140,8 @@ sub submit {
     }
     die 'Unsupported action' unless $action;
 
-    my $result       = $mock_responses->{$action} || $default_mock;
-    my $order_number = $result->{'x_document'} // $result->{'x_auth_id'};
+    my $result       = $mock_responses->{$action}->{$content{'card_number'}} || $default_mock;
+    my $order_number = $result->{'order_number'};
     $order_number    = ref $order_number eq 'CODE' ? $order_number->() : $order_number;
 
     $self->error_message( $result->{'error_message'} );

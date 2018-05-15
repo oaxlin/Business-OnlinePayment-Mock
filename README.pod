@@ -21,10 +21,10 @@ version 0.001
 Sets the default mock for the Business::OnlinePayment object
 
    $mock->set_default_mock({
-     error_message => 'foobar',
-     is_success    => 123
-     error_code    => 123
-     order_number  => 123
+     error_message => 'Declined',
+     is_success    => 0,
+     error_code    => 100,
+     order_number  => 1,
    });
 
 =head2 set_mock_response
@@ -32,10 +32,10 @@ Sets the default mock for the Business::OnlinePayment object
 Sets the mock response the Business::OnlinePayment object
 
    $mock->set_mock_response({
-     error_message => 'foobar',
-     is_success    => 123
-     error_code    => 123
-     order_number  => 123
+     error_message => 'Approved',
+     is_success    => 1,
+     error_code    => 0,
+     order_number  => 1,
    });
 
 =head2 test_transaction
