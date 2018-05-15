@@ -26,6 +26,10 @@ our $me      = 'Business::OnlinePayment::Mock';
 our $mock_responses;
 
 our $default_mock = {
+     error_message => 'Declined',
+     is_success    => 0,
+     error_code    => 100,
+     order_number  => sub { time },
 };
 
 sub _info {
@@ -49,6 +53,46 @@ sub _info {
     };
 }
 
+=method set_default_mock
+
+Sets the default mock for the Business::OnlinePayment object
+
+   $mock->set_default_mock({
+     error_message => 'foobar',
+     is_success    => 123
+     error_code    => 123
+     order_number  => 123
+   });
+
+=cut
+
+sub set_default_mock {
+    my ($self, $default) = @_;
+
+    $default_mock = $default;
+}
+
+=method set_mock_response
+
+Sets the mock response the Business::OnlinePayment object
+
+   $mock->set_mock_response({
+     error_message => 'foobar',
+     is_success    => 123
+     error_code    => 123
+     order_number  => 123
+   });
+
+=cut
+
+sub set_mock_response {
+    my ($self, $response, $set_as_default) = @_;
+
+    $mock_responses->{delete $response->{'action'}}->{delete $response->{'card_number'}} = $response;
+
+    $self->set_as_default($response) if $set_as_default;
+}
+
 =method test_transaction
 
 Get/set the server used for processing transactions.  Because we are mocked, this method effectively does nothing.
@@ -64,13 +108,12 @@ Default: Live
 
 sub test_transaction {
     my $self = shift;
-    my $test_mode = shift;
-    if (! defined $test_mode) { $test_mode = $self->{'test_transaction'} || 0; }
-    $self->{'test_transaction'} = $test_mode;
-    # normally we'd set server/port/path here but we aren't real so there isn't anything to set
-    $self->server('');
-    $self->port('');
-    $self->path('');
+
+    $self->{'test_transaction'} = 1;
+    $self->server('example.com');
+    $self->port(443);
+    $self->path('/example.html');
+
     return $self->{'test_transaction'};
 }
 
@@ -88,19 +131,21 @@ sub submit {
     my $action;
     foreach my $a (@{$self->_info()->{'supported_actions'}->{'CC'}}) {
         if (lc $a eq lc $content{'action'}) {
-            $action = lc('_'.$a);
-            $action =~ s/ /\_/g;
+            $action = $a; last;
         }
     }
     die 'Unsupported action' unless $action;
 
-    my $result = $mock_responses->{$action} || $default_mock;
-    my $res = {};
-    $self->error_message( $res->{'error_message'} );
-    $self->result_code( $res->{'error_code'} );
-    $self->is_success( defined $res->{'result'} && $res->{'result'} =~ /^9|11$/ ? 1 : 0 );
-    $self->order_number( $res->{'x_document'} // $res->{'x_auth_id'} ); # sale vs auth
-    return $res;
+    my $result       = $mock_responses->{$action} || $default_mock;
+    my $order_number = $result->{'x_document'} // $result->{'x_auth_id'};
+    $order_number    = ref $order_number eq 'CODE' ? $order_number->() : $order_number;
+
+    $self->error_message( $result->{'error_message'} );
+    $self->result_code( $result->{'error_code'} );
+    $self->is_success( defined $result->{'result'} && $result->{'result'} =~ /^9|11$/ ? 1 : 0 );
+    $self->order_number($order_number); # sale vs Authorization
+
+    return $result;
 }
 
 1;
