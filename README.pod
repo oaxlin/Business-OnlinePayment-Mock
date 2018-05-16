@@ -53,6 +53,10 @@ Default: Live
 
 Submit the content to the mocked API
 
+  $self->content(action => 'Credit' ...)
+
+  $self->submit;
+
 =head1 NAME
 
 Business::OnlinePayment::Mock - A backend for mocking fake results in the Business::OnlinePayment environment
