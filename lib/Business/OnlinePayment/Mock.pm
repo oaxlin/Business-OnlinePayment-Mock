@@ -21,7 +21,7 @@ our $me      = 'Business::OnlinePayment::Mock';
 
 # VERSION
 # PODNAME: Business::OnlinePayment::Mock
-# ABSTRACT: Business::OnlinePayment::Mock - A backend for mocking fake results for test cards
+# ABSTRACT: A backend for mocking fake results for test cards
 
 our $mock_responses;
 
