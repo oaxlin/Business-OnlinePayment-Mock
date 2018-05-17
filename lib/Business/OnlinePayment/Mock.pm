@@ -8,9 +8,44 @@ Business::OnlinePayment::Mock - A backend for mocking fake results in the Busine
 
 =head1 SYNOPSIS
 
+   # During initilaziation of your scripts, setup the responses you want from each aciton/card number
+
+   $mock->set_mock_response({
+     action        => 'Credit',
+     card_number   => '4111111111111111',
+     error_message => 'Approved',
+     is_success    => 1,
+     error_code    => 0,
+     order_number  => 1,
+   });
+
+   # Then later once you are ready to use the mock module
+
+   my $transaction = new Business::OnlinePayment('Mock');
+   $transaction->content(
+     type        => 'Visa',
+     amount      => '49.95',
+     card_number => '1234123412341238',
+     expiration  => '06/15',
+     name        => 'John Q Doe',
+   );
+   eval { $transaction->submit(); };
+
+   if ( $@ ) {
+     print "$processor error: $@\n";
+   } else {
+     if ( $transaction->is_success() ) {
+       print "Card processed successfully: ". $transaction->authorization()."\n";
+     } else {
+       print "Card was rejected: ". $transaction->error_message(). "\n";
+     }
+   }
+
 =cut
 
 =head1 DESCRIPTION
+
+Ability to get any Business::OnlinePayment result you want using this mock driver.
 
 =cut
 
@@ -77,6 +112,8 @@ sub set_default_mock {
 Sets the mock response the Business::OnlinePayment object
 
    $mock->set_mock_response({
+     action        => 'Credit',
+     card_number   => '4111111111111111',
      error_message => 'Approved',
      is_success    => 1,
      error_code    => 0,
@@ -140,14 +177,11 @@ sub submit {
     }
     die 'Unsupported action' unless $action;
 
-    my $result       = $mock_responses->{$action}->{$content{'card_number'}} || $default_mock;
-    my $order_number = $result->{'order_number'};
-    $order_number    = ref $order_number eq 'CODE' ? $order_number->() : $order_number;
-
-    $self->error_message( $result->{'error_message'} );
-    $self->result_code( $result->{'error_code'} );
-    $self->is_success( defined $result->{'result'} && $result->{'result'} =~ /^9|11$/ ? 1 : 0 );
-    $self->order_number($order_number); # sale vs Authorization
+    my $result       = {%{$mock_responses->{$action}->{$content{'card_number'}} || $default_mock}}; # cheap clone
+    foreach my $k (keys %$result) {
+        my $val = $result->{$k};
+        $self->$k( ref $val eq 'CODE' ? $val->() : $val ) if $self->can($k);
+    }
 
     return $result;
 }
