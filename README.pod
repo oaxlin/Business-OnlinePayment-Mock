@@ -4,11 +4,11 @@
 
 =head1 NAME
 
-Business::OnlinePayment::Mock - Business::OnlinePayment::Mock - A backend for mocking fake results for test cards
+Business::OnlinePayment::Mock - A backend for mocking fake results for test cards
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
