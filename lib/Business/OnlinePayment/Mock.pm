@@ -180,7 +180,7 @@ sub submit {
     my $result       = {%{$mock_responses->{$action}->{$content{'card_number'}} || $default_mock}}; # cheap clone
     foreach my $k (keys %$result) {
         my $val = $result->{$k};
-        $self->$k( ref $val eq 'CODE' ? $val->() : $val ) if $self->can($k);
+        $self->$k( ref $val eq 'CODE' ? $val->(\%content) : $val ) if $self->can($k);
     }
 
     return $result;
