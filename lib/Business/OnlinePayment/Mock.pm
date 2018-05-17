@@ -52,7 +52,7 @@ Ability to get any Business::OnlinePayment result you want using this mock drive
 use Business::OnlinePayment;
 use Business::OnlinePayment::HTTPS;
 use parent qw(Business::OnlinePayment::HTTPS);
-our $me      = 'Business::OnlinePayment::Mock';
+our $me = 'Business::OnlinePayment::Mock';
 
 # VERSION
 # PODNAME: Business::OnlinePayment::Mock
@@ -76,6 +76,7 @@ sub _info {
         supported_types   => ['CC'],
         supported_actions => {
             CC => [
+
                 # 'Tokenize', # TODO
                 'Normal Authorization',
                 'Post Authorization',
@@ -125,7 +126,7 @@ Sets the mock response the Business::OnlinePayment object
 sub set_mock_response {
     my ($self, $response, $set_as_default) = @_;
 
-    $mock_responses->{delete $response->{'action'}}->{delete $response->{'card_number'}} = $response;
+    $mock_responses->{ delete $response->{'action'} }->{ delete $response->{'card_number'} } = $response;
 
     $self->set_as_default($response) if $set_as_default;
 }
@@ -165,22 +166,25 @@ Submit the content to the mocked API
 =cut
 
 sub submit {
-    my $self = shift;
+    my $self    = shift;
     my %content = $self->content();
     die 'Missing action' unless $content{'action'};
 
     my $action;
-    foreach my $a (@{$self->_info()->{'supported_actions'}->{'CC'}}) {
+    foreach my $a (@{ $self->_info()->{'supported_actions'}->{'CC'} }) {
         if (lc $a eq lc $content{'action'}) {
-            $action = $a; last;
+            $action = $a;
+            last;
         }
     }
     die 'Unsupported action' unless $action;
 
-    my $result       = {%{$mock_responses->{$action}->{$content{'card_number'}} || $default_mock}}; # cheap clone
-    foreach my $k (keys %$result) {
+    my $result = { %{ $mock_responses->{$action}->{ $content{'card_number'} } || $default_mock } };    # cheap clone
+
+    foreach my $k (keys %{$result}) {
         my $val = $result->{$k};
-        $self->$k( ref $val eq 'CODE' ? $val->(\%content) : $val ) if $self->can($k);
+        $result->{$k} = ref $val eq 'CODE' ? $val->(\%content) : $val;
+        $self->$k($result->{$k}) if $self->can($k);
     }
 
     return $result;
