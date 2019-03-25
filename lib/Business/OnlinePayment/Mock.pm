@@ -84,6 +84,7 @@ sub _info {
                 'Credit',
                 'Void',
                 'Auth Reversal',
+                'PreAuth'
             ],
         },
     };
