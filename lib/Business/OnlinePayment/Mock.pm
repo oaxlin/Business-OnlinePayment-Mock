@@ -67,6 +67,13 @@ our $default_mock = {
     order_number  => sub { time },
 };
 
+our $default_approved_mock = {
+    error_message => 'Approved',
+    is_success    => 1,
+    error_code    => 0,
+    order_number  => sub { time },
+};
+
 sub _info {
     return {
         info_compat       => '0.01',
@@ -84,7 +91,8 @@ sub _info {
                 'Credit',
                 'Void',
                 'Auth Reversal',
-                'PreAuth'
+                'PreAuth',
+                'Mark Token Used', # very few bop modules use this
             ],
         },
     };
@@ -179,6 +187,7 @@ sub submit {
         }
     }
     die 'Unsupported action' unless $action;
+    local $default_mock = $default_approved_mock if $action eq 'Mark Token Used'; # these always approve
 
     my $result = { %{ $mock_responses->{$action}->{ $content{'card_number'} } || $default_mock } };    # cheap clone
 
